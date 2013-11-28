@@ -3,10 +3,8 @@
 PVOID protVectoredHandler;
 DWORD dwTxtBase;
 DWORD dwTxtSize;
-
 DWORD dwRdataBase;
 DWORD dwRdataSize;
-
 DWORD ImportDirectoryRVA;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
@@ -40,13 +38,13 @@ LONG CALLBACK ProtectionFaultVectoredHandler(PEXCEPTION_POINTERS ExceptionInfo)
 {
 	DWORD dwOldProtect;
 
-	//dbg_msg("ExceptionInfo->ExceptionRecord->ExceptionCode = %08X ; ExceptionInfo->ContextRecord->Eip = %08X ; ExceptionInfo->ExceptionRecord->ExceptionAddress = %08X\n", ExceptionInfo->ExceptionRecord->ExceptionCode, ExceptionInfo->ContextRecord->Eip, ExceptionInfo->ExceptionRecord->ExceptionAddress);
     if (ExceptionInfo->ExceptionRecord->ExceptionCode == STATUS_ACCESS_VIOLATION)
     {
 		if (ExceptionInfo->ContextRecord->Eip >= dwTxtBase && ExceptionInfo->ContextRecord->Eip <= (dwTxtBase + dwTxtSize))
 		{
 			RemoveVectoredExceptionHandler(protVectoredHandler);
 			dbg_msg("[+] Found OEP : %08X\n", ExceptionInfo->ContextRecord->Eip);
+
 			// Restore Read / write protection on .txt
 			VirtualProtect((LPVOID)dwTxtBase, dwTxtSize, PAGE_READWRITE, &dwOldProtect);
 			dump(GetModuleHandleA(NULL), ExceptionInfo->ContextRecord->Eip, ImportDirectoryRVA);
@@ -56,9 +54,7 @@ LONG CALLBACK ProtectionFaultVectoredHandler(PEXCEPTION_POINTERS ExceptionInfo)
 		{
 			// Restore Read / write protection on .rdata
 			VirtualProtect((LPVOID)dwRdataBase, dwRdataSize, PAGE_READWRITE, &dwOldProtect);
-
 			ImportDirectoryRVA = ExceptionInfo->ExceptionRecord->ExceptionInformation[1] - 0x10 - (DWORD)GetModuleHandleA(NULL);
-
 			dbg_msg("[+] RVA IAT : %08X\n", ImportDirectoryRVA);
 			return EXCEPTION_CONTINUE_EXECUTION;
 		}

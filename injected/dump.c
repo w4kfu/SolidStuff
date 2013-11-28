@@ -54,31 +54,21 @@ BOOL dump(DWORD hModule, DWORD dwOEP, DWORD ImportDirectoryRVA)
 	memcpy(pAct, (LPVOID)hModule, sizeof (IMAGE_DOS_HEADER));
 	dwFinalSize += sizeof (IMAGE_DOS_HEADER);
 
-	dbg_msg("[+] dwFinalSize = %08X\n", dwFinalSize);
-
 	/* Copy PADDING */
 	memcpy(pAct + dwFinalSize, (LPVOID)(hModule + dwFinalSize), (DWORD)pPE - (DWORD)((DWORD)pDosHeader + sizeof (IMAGE_DOS_HEADER)));
 	dwFinalSize += (DWORD)pPE - (DWORD)((DWORD)pDosHeader + sizeof (IMAGE_DOS_HEADER));
-
-	dbg_msg("[+] dwFinalSize = %08X\n", dwFinalSize);
 
 	/* Copy NT HEADER */
 	memcpy(pAct + dwFinalSize, (LPVOID)pPE, sizeof (IMAGE_FILE_HEADER) + pPE->FileHeader.SizeOfOptionalHeader + sizeof(DWORD));
 	dwFinalSize += sizeof (IMAGE_FILE_HEADER) + pPE->FileHeader.SizeOfOptionalHeader + sizeof(DWORD);
 
-	dbg_msg("[+] dwFinalSize = %08X\n", dwFinalSize);
-
 	/* Copy Sections */
 	memcpy(pAct + dwFinalSize, (LPVOID)pSection, sizeof (IMAGE_SECTION_HEADER) * pPE->FileHeader.NumberOfSections);
 	dwFinalSize += sizeof (IMAGE_SECTION_HEADER) * pPE->FileHeader.NumberOfSections;
 
-	dbg_msg("[+] dwFinalSize = %08X\n", dwFinalSize);
-
 	dwAlign = AlignSize(dwFinalSize, pPE->OptionalHeader.FileAlignment);
 	for (; dwFinalSize < dwAlign; dwFinalSize++)
 		*(pAct + dwFinalSize) = 0;
-
-	dbg_msg("[+] dwFinalSize = %08X\n", dwFinalSize);
 
 	for (i = 0; i < pPE->FileHeader.NumberOfSections; i++)
 	{
@@ -87,11 +77,11 @@ BOOL dump(DWORD hModule, DWORD dwOEP, DWORD ImportDirectoryRVA)
 		dwAlign = AlignSize(dwFinalSize, pPE->OptionalHeader.FileAlignment);
 		for (; dwFinalSize < dwAlign; dwFinalSize++)
 			*(pAct + dwFinalSize) = 0;
-		dbg_msg("[+] dwFinalSize = %08X\n", dwFinalSize);
 	}
 
     pDosHeader = (PIMAGE_DOS_HEADER)pAct;
     pPE = (PIMAGE_NT_HEADERS)((DWORD)pAct + pDosHeader->e_lfanew);
+
 	// FIX OEP
 	pPE->OptionalHeader.AddressOfEntryPoint = dwOEP - hModule;
 

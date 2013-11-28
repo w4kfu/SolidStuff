@@ -42,7 +42,6 @@ BOOL __stdcall Hook_VirtualProtect(LPVOID lpAddress, SIZE_T dwSize, DWORD flNewP
 		mov eax, [ebp + 4]
 		mov return_addr, eax
 	}
-	//dbg_msg("VirtualProtect(0x%08X, 0x%08X, 0x%08X, 0x%08X) : 0x%08X\n\n", lpAddress, dwSize, flNewProtect, lpflOldProtect, return_addr);
 	if (lpAddress >= (LPVOID)dwTxtBase && lpAddress <= (LPVOID)(dwTxtBase + dwTxtSize))
 	{
 		if (flNewProtect == PAGE_EXECUTE_READ)
