@@ -23,6 +23,42 @@ void dbg_msg(char *format, ...)
   fclose(fp);
 }
 
+void PrintNTFileHeader(DWORD dwBase)
+{
+    PIMAGE_DOS_HEADER pDosHeader;
+    PIMAGE_NT_HEADERS pPE;
+
+    pDosHeader = (PIMAGE_DOS_HEADER)dwBase;
+    pPE = (PIMAGE_NT_HEADERS)(dwBase + pDosHeader->e_lfanew);
+	dbg_msg("[+] Info NT FILE HEADER\n");
+	dbg_msg("\t Characteristics      = %08X\n", pPE->FileHeader.Characteristics);
+	dbg_msg("\t Machine              = %08X\n", pPE->FileHeader.Machine);
+	dbg_msg("\t NumberOfSections     = %08X\n", pPE->FileHeader.NumberOfSections);
+	dbg_msg("\t NumberOfSymbols      = %08X\n", pPE->FileHeader.NumberOfSymbols);
+	dbg_msg("\t PointerToSymbolTable = %08X\n", pPE->FileHeader.PointerToSymbolTable);
+	dbg_msg("\t SizeOfOptionalHeader = %08X\n", pPE->FileHeader.SizeOfOptionalHeader);
+	dbg_msg("\t TimeDateStamp        = %08X\n", pPE->FileHeader.TimeDateStamp);
+}
+
+void PrintNTOptionalHeader(DWORD dwBase)
+{
+    PIMAGE_DOS_HEADER pDosHeader;
+    PIMAGE_NT_HEADERS pPE;
+
+    pDosHeader = (PIMAGE_DOS_HEADER)dwBase;
+    pPE = (PIMAGE_NT_HEADERS)(dwBase + pDosHeader->e_lfanew);
+	dbg_msg("[+] Info NT OPTIONAL HEADER\n");
+	dbg_msg("\t AddressOfEntryPoint = %08X\n", pPE->OptionalHeader.AddressOfEntryPoint);
+	dbg_msg("\t BaseOfCode          = %08X\n", pPE->OptionalHeader.BaseOfCode);
+	dbg_msg("\t BaseOfData          = %08X\n", pPE->OptionalHeader.BaseOfData);
+	dbg_msg("\t CheckSum            = %08X\n", pPE->OptionalHeader.CheckSum);
+	dbg_msg("\t DllCharacteristics  = %08X\n", pPE->OptionalHeader.DllCharacteristics);
+	dbg_msg("\t FileAlignment       = %08X\n", pPE->OptionalHeader.FileAlignment);
+	dbg_msg("\t ImageBase           = %08X\n", pPE->OptionalHeader.ImageBase);
+	dbg_msg("\t LoaderFlags         = %08X\n", pPE->OptionalHeader.LoaderFlags);
+	dbg_msg("\t SectionAlignment    = %08X\n", pPE->OptionalHeader.SectionAlignment);
+}
+
 void hex_dump(void *data, size_t size)
 {
 	unsigned char *p =(unsigned char*)data;

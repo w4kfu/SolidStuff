@@ -1,13 +1,58 @@
 #include <stdio.h>
 #include <Windows.h>
 
+void hex_dump(void *data, int size)
+{
+    unsigned char *p = (unsigned char*)data;
+    unsigned char c;
+    int n;
+    char bytestr[4] = {0};
+    char addrstr[10] = {0};
+    char hexstr[16 * 3 + 5] = {0};
+    char charstr[16 * 1 + 5] = {0};
+
+    for(n = 1; n <= size; n++)
+    {
+        if (n % 16 == 1)
+        {
+                sprintf_s(addrstr, sizeof(addrstr), "%.4x",
+                    (p - (unsigned char*)data));
+        }
+        c = *p;
+        if (isalnum(c) == 0)
+        {
+            c = '.';
+        }
+        sprintf_s(bytestr, sizeof(bytestr), "%02X ", *p);
+        strncat(hexstr, bytestr, sizeof(hexstr)-strlen(hexstr)-1);
+        sprintf_s(bytestr, sizeof(bytestr), "%c", c);
+        strncat(charstr, bytestr, sizeof(charstr)-strlen(charstr)-1);
+        if (n % 16 == 0)
+        {
+            printf("[%4.4s]   %-50.50s  %s\n", addrstr, hexstr, charstr);
+            hexstr[0] = 0;
+            charstr[0] = 0;
+        }
+        else if (n % 8 == 0)
+        {
+            strncat(hexstr, "  ", sizeof(hexstr)-strlen(hexstr)-1);
+            strncat(charstr, " ", sizeof(charstr)-strlen(charstr)-1);
+        }
+        p++;
+    }
+    if (strlen(hexstr) > 0)
+    {
+        printf("[%4.4s]   %-50.50s  %s\n", addrstr, hexstr, charstr);
+    }
+}
+
 void create_process(char *name, char *dll_name)
 {
-        STARTUPINFOA                si;
+        STARTUPINFOA si;
         PROCESS_INFORMATION pi;
-        DWORD                                Addr;
-        HANDLE                                hThread;
-        HMODULE                                hKernel32;
+        DWORD Addr;
+        HANDLE hThread;
+        HMODULE hKernel32;
 
         hKernel32 = GetModuleHandleA("kernel32.dll");
         memset(&si, 0, sizeof(STARTUPINFO));
@@ -20,7 +65,7 @@ void create_process(char *name, char *dll_name)
                 exit(EXIT_FAILURE);
         }
         Addr = (DWORD)VirtualAllocEx(pi.hProcess, 0, strlen(dll_name) + 1, MEM_COMMIT, PAGE_READWRITE);
-        if (Addr == NULL)
+        if ((LPVOID)Addr == NULL)
         {
                 printf("[-] VirtualAllocEx failed(), LastError : %x\n", GetLastError());
                 TerminateProcess(pi.hProcess, 42);
@@ -29,13 +74,12 @@ void create_process(char *name, char *dll_name)
 
         WriteProcessMemory(pi.hProcess, (LPVOID)Addr, (void*)dll_name, strlen(dll_name) + 1, NULL);
         hThread = CreateRemoteThread(pi.hProcess, NULL, 0,
-                                (LPTHREAD_START_ROUTINE) ::GetProcAddress(hKernel32,"LoadLibraryA" ), 
+                                (LPTHREAD_START_ROUTINE) GetProcAddress(hKernel32,"LoadLibraryA" ), 
                                 (LPVOID)Addr, 0, NULL);
         WaitForSingleObject(hThread, INFINITE);
         ResumeThread(pi.hThread);
         CloseHandle(hThread);
 }
-
 
 int main(int argc, char **argv)
 {

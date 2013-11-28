@@ -6,4 +6,7 @@
 DWORD GetTextAddress(HMODULE hModule);
 DWORD GetTextSize(HMODULE hModule);
 
+DWORD GetRdataSize(HMODULE hModule);
+DWORD GetRdataAddress(HMODULE hModule);
+
 #endif

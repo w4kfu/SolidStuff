@@ -34,7 +34,8 @@ void setup_hook(char *module, char *name_export, void *Hook_func, void *trampo, 
 /* They don't call for example one time VirtualProtect on .txt section, but about (.txt section size / 4) ... */
 BOOL __stdcall Hook_VirtualProtect(LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect)
 {
-    DWORD	return_addr;
+    DWORD return_addr;
+	DWORD dwOldProt;
 
 	__asm
 	{

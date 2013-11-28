@@ -10,4 +10,7 @@
 void hex_dump(void *data, size_t size);
 void dbg_msg(char *format, ...);
 
+void PrintNTFileHeader(DWORD dwBase);
+void PrintNTOptionalHeader(DWORD dwBase);
+
 #endif

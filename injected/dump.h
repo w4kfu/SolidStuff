@@ -3,6 +3,8 @@
 
 #include <windows.h>
 
-BOOL dump(HMODULE hModule, DWORD dwOEP);
+#include "dbg.h"
+
+BOOL dump(HMODULE hModule, DWORD dwOEP, DWORD ImportDirectoryRVA);
 
 #endif // DUMP_H_
