@@ -5,6 +5,7 @@
 
 #include "dbg.h"
 
-BOOL dump(HMODULE hModule, DWORD dwOEP, DWORD ImportDirectoryRVA);
+BOOL dump(DWORD hModule, DWORD dwOEP, DWORD ImportDirectoryRVA);
+BOOL dump_other(DWORD hModule, DWORD dwOEP);
 
 #endif // DUMP_H_

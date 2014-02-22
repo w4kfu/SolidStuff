@@ -15,11 +15,36 @@ PBYTE AllocEnough(DWORD dwBase, DWORD *dwAllocSize)
     pDosHeader = (PIMAGE_DOS_HEADER)dwBase;
     pPE = (PIMAGE_NT_HEADERS)(dwBase + pDosHeader->e_lfanew);
     pSectionHeaders = (PIMAGE_SECTION_HEADER)((PBYTE)pPE + sizeof(IMAGE_FILE_HEADER) + pPE->FileHeader.SizeOfOptionalHeader + sizeof(DWORD));
-    *dwAllocSize = pSectionHeaders[pPE->FileHeader.NumberOfSections-1].VirtualAddress + pSectionHeaders[pPE->FileHeader.NumberOfSections-1].Misc.VirtualSize;
+    *dwAllocSize = pSectionHeaders[pPE->FileHeader.NumberOfSections - 1].VirtualAddress + pSectionHeaders[pPE->FileHeader.NumberOfSections - 1].Misc.VirtualSize;
     pDump = (PBYTE)VirtualAlloc(NULL, *dwAllocSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (!pDump)
         return NULL;
     return pDump;
+}
+
+VOID ModifyLastSection(DWORD dwBase)
+{
+    PIMAGE_DOS_HEADER pDosHeader;
+    PIMAGE_NT_HEADERS pPE;
+    PIMAGE_SECTION_HEADER pSectionHeaders;
+	DWORD OldProtect;
+
+    pDosHeader = (PIMAGE_DOS_HEADER)dwBase;
+    pPE = (PIMAGE_NT_HEADERS)(dwBase + pDosHeader->e_lfanew);
+    pSectionHeaders = (PIMAGE_SECTION_HEADER)((PBYTE)pPE + sizeof(IMAGE_FILE_HEADER) + pPE->FileHeader.SizeOfOptionalHeader + sizeof(DWORD));
+	
+	VirtualProtect(pDosHeader, 0x2000, PAGE_EXECUTE_READWRITE, &OldProtect);
+	pSectionHeaders[pPE->FileHeader.NumberOfSections - 1].Misc.VirtualSize += 0x1000;
+	pSectionHeaders[pPE->FileHeader.NumberOfSections - 1].SizeOfRawData += 0x1000;
+	pPE->OptionalHeader.FileAlignment += 0x1000;
+	VirtualProtect(pDosHeader, 0x2000, OldProtect, &OldProtect);	
+}
+
+BOOL dump_other(DWORD hModule, DWORD dwOEP)
+{
+	//ModifyLastSection(hModule);
+	dump(hModule, dwOEP, 0);
+	return TRUE;
 }
 
 BOOL dump(DWORD hModule, DWORD dwOEP, DWORD ImportDirectoryRVA)
@@ -109,6 +134,7 @@ BOOL dump(DWORD hModule, DWORD dwOEP, DWORD ImportDirectoryRVA)
 	{
         return FALSE;
 	}
+	CloseHandle(hFile);
 	VirtualFree(pDump, dwAllocSize, 0);
 	return TRUE;
 }

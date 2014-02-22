@@ -8,8 +8,6 @@
 #include "hookstuff.h"
 #include "dump.h"
 
-#define DLL_NAME "injected.dll"
-
 LONG CALLBACK ProtectionFaultVectoredHandler(PEXCEPTION_POINTERS ExceptionInfo);
 
 #endif

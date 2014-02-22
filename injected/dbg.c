@@ -20,6 +20,7 @@ void dbg_msg(char *format, ...)
 	  fp = fopen(FILE_DBG, "a");
   va_end(args);
   fprintf(fp, "%s", buffer);
+  printf("%s", buffer);
   fclose(fp);
 }
 
@@ -63,7 +64,7 @@ void hex_dump(void *data, size_t size)
 {
 	unsigned char *p =(unsigned char*)data;
     unsigned char c;
-    int n;
+    size_t n;
     char bytestr[4] = {0};
     char addrstr[10] = {0};
     char hexstr[ 16*3 + 5] = {0};

@@ -16,6 +16,8 @@ int __stdcall LDE(void* address , DWORD type);
 
 extern DWORD dwTxtBase;
 extern DWORD dwTxtSize;
+extern DWORD dwRdataBase;
+extern DWORD dwRdataSize;
 
 void setup_hook(char *module, char *name_export, void *Hook_func, void *trampo, DWORD addr);
 void setup_all_hook(void);
